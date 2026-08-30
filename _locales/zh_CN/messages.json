@@ -1,0 +1,182 @@
+{
+  "extName": {
+    "message": "InfoHunter",
+    "description": "extension name"
+  },
+  "extDescription": {
+    "message": "从网页源码与 JS 中挖掘敏感信息、接口与路由",
+    "description": "extension description"
+  },
+  "Zhuye": {
+    "message": "主页",
+    "description": "popup页面的主页"
+  },
+  "Peizhi": {
+    "message": "配置",
+    "description": "popup页面的配置"
+  },
+  "popupCopy": {
+    "message": "复制",
+    "description": "popup页面的复制按钮"
+  },
+  "popupCopyurl": {
+    "message": "复制URL",
+    "description": "popup页面的复制URL按钮"
+  },
+  "popupIp": {
+    "message": "IP",
+    "description": "popup页面的标题：IP"
+  },
+  "popupIpPort": {
+    "message": "IP加端口",
+    "description": "popup页面的标题：IP_PORT"
+  },
+  "popupDomain": {
+    "message": "域名",
+    "description": "popup页面的标题：域名"
+  },
+  "popupSfz": {
+    "message": "身份证",
+    "description": "popup页面的标题：身份证"
+  },
+  "popupMobile": {
+    "message": "手机号",
+    "description": "popup页面的标题：手机号"
+  },
+  "popupMail": {
+    "message": "邮箱",
+    "description": "popup页面的标题：邮箱"
+  },
+  "popupJwt": {
+    "message": "JWT",
+    "description": "popup页面的标题：JWT"
+  },
+  "popupAlgorithm": {
+    "message": "算法",
+    "description": "popup页面的标题：算法"
+  },
+  "popupSecret": {
+    "message": "敏感信息",
+    "description": "popup页面的标题：敏感信息"
+  },
+  "popupPath": {
+    "message": "PATH",
+    "description": "popup页面的标题：路径"
+  },
+  "popupIncompletePath": {
+    "message": "IncompletePath",
+    "description": "popup页面的标题：不完整的路径"
+  },
+  "popupUrl": {
+    "message": "URL",
+    "description": "popup页面的标题：url"
+  },
+  "popupStaticPath": {
+    "message": "StaticPath",
+    "description": "popup页面的标题：静态路径"
+  },
+  "popupProcessing": {
+    "message": "处理中..",
+    "description": "popup页面的进度提示：处理中"
+  },
+  "popupComplete": {
+    "message": "处理完成：",
+    "description": "popup页面的进度提示：处理完成"
+  },
+  "popupTipClickBeforeCopy": {
+    "message": "请点击原页面后再复制：）",
+    "description": "popup页面的点击复制时异常的提示：请点击原页面后再复制：）"
+  },
+  "settingClearCache": {
+    "message": "清理缓存",
+    "description": "配置页的标题：清理缓存"
+  },
+  "settingClearLocalStorage": {
+    "message": "清理",
+    "description": "配置页的按钮：清理"
+  },
+  "settingClearComplete": {
+    "message": "清理完成",
+    "description": "配置页的提示：清理完成"
+  },
+  "settingClosed": {
+    "message": "已关闭",
+    "description": "配置页的按钮：已关闭"
+  },
+  "settingOpened": {
+    "message": "已打开",
+    "description": "配置页的按钮：已打开"
+  },
+  "settingGlobalFloatingWindow": {
+    "message": "全局悬浮窗",
+    "description": "配置页的标题：全局悬浮窗"
+  },
+  "settingAutoTimeout": {
+    "message": "自动超时",
+    "description": "配置页的标题：自动超时"
+  },
+  "settingSafe": {
+    "message": "安全模式",
+    "description": "配置页的标题：安全模式"
+  },
+  "settingWebhook": {
+    "message": "Webhook",
+    "description": "配置页的标题：Webhook"
+  },
+  "settingWebhookUrl": {
+    "message": "回调地址",
+    "description": "配置页的配置项：回调地址"
+  },
+  "settingWebhookMethod": {
+    "message": "请求方法",
+    "description": "配置页的配置项：请求方法"
+  },
+  "settingWebhookArg": {
+    "message": "请求参数",
+    "description": "配置页的配置项：请求方法"
+  },
+  "settingWebhookHeaders": {
+    "message": "自定义headers",
+    "description": "配置页的配置项：自定义headers"
+  },
+  "settingDomainAllowList": {
+    "message": "域名白名单",
+    "description": "配置页的配置项：域名白名单"
+  },
+  "settingDomainAllowListTip": {
+    "message": "输入域名的结尾部分，以换行分隔，若不配置默认使用.google.com,.amazon.com,portswigger.net",
+    "description": "配置页的域名白名单里的提示"
+  },
+  "settingResetAndSave": {
+    "message": "置空并保存",
+    "description": "配置页的按钮：置空并保存"
+  },
+  "settingSave": {
+    "message": "保存",
+    "description": "配置页的按钮：保存"
+  },
+  "getstartedContent": {
+    "message": "# InfoHunter\n\n在网页源码与 JS 中发现敏感信息、接口、路由与密钥。\n\n- 打开任意站点后点击工具栏图标查看结果\n- 设置页可调整抓取范围与 Sourcemap/JS 递归开关\n- 详细说明见发布说明",
+    "description": "getstarted"
+  },
+  "popupRoute": {
+    "message": "路由",
+    "description": "popup页面的标题：路由"
+  },
+  "popupSourcemap": {
+    "message": "Sourcemap",
+    "description": "popup页面的标题：sourcemap"
+  },
+  "popupRequest": {
+    "message": "真实请求"
+  },
+  "popupEndpoint": {
+    "message": "端点"
+  },
+  "popupStorage": {
+    "message": "存储键名"
+  },
+  "popupParam": {
+    "message": "参数名"
+  }
+}

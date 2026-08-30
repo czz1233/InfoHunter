@@ -1,0 +1,15 @@
+# ===== 签名密钥：绝不提交 =====
+# 泄露 fs_key.pem 等于任何人可以冒充本扩展的 ID 推送更新
+*.pem
+.release_keys/
+
+# ===== 构建产物：走 GitHub Releases，不入库 =====
+release/
+*.zip
+*.crx
+
+# ===== 系统 / 编辑器 =====
+.DS_Store
+Thumbs.db
+*.log
+node_modules/

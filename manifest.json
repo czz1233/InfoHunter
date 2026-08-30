@@ -1,0 +1,58 @@
+{
+  "name": "__MSG_extName__",
+  "version": "1.0.3",
+  "manifest_version": 3,
+  "description": "__MSG_extDescription__",
+  "permissions": [
+    "tabs",
+    "storage",
+    "unlimitedStorage",
+    "webRequest"
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ],
+  "content_scripts": [
+    {
+      "matches": [
+        "https://*/*",
+        "http://*/*",
+        "file://*"
+      ],
+      "js": [
+        "src/utils/categories.js",
+        "src/utils/hostmatch.js",
+        "content.js"
+      ]
+    },
+    {
+      "matches": [
+        "https://*/*",
+        "http://*/*"
+      ],
+      "js": [
+        "src/utils/framework-analyze.js",
+        "src/utils/runtime-hooks.js"
+      ],
+      "run_at": "document_start",
+      "world": "MAIN"
+    }
+  ],
+  "icons": {
+    "16": "icons/icon_16.png",
+    "48": "icons/icon_48.png",
+    "128": "icons/icon_128.png"
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_icon": {
+      "16": "icons/icon_16.png",
+      "48": "icons/icon_48.png",
+      "128": "icons/icon_128.png"
+    },
+    "default_popup": "popup.html"
+  },
+  "default_locale": "zh_CN"
+}

@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>InfoHunter</title>
+  <style>
+    :root{
+      --bg:#ffffff; --panel:#f6f7f9; --fg:#1f2328; --muted:#6b7280; --line:#e5e7eb;
+      --accent:#2563eb; --accent-weak:#eff6ff; --accent-fg:#ffffff;
+      --danger:#dc2626; --ok:#16a34a; --chip:#f3f4f6; --hover:#f3f4f6;
+      --seg-active:#ffffff; --flash:#dcfce7;
+      --radius:10px; --radius-sm:6px; --shadow:0 1px 3px rgba(0,0,0,.08);
+      --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;
+    }
+    *{box-sizing:border-box}
+    ::-webkit-scrollbar{width:9px;height:9px}
+    ::-webkit-scrollbar-thumb{background:var(--line);border-radius:5px;border:2px solid var(--bg)}
+    ::-webkit-scrollbar-thumb:hover{background:var(--muted)}
+    ::-webkit-scrollbar-track{background:transparent}
+    body{
+      width:720px; max-width:720px; min-width:480px; margin:0;
+      max-height:580px; overflow-y:auto; overflow-x:hidden;
+      background:var(--bg); color:var(--fg);
+      font:13px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI","Microsoft YaHei",sans-serif;
+    }
+    header{display:flex;align-items:center;gap:8px;padding:10px 12px 0}
+    /* 分段式页签：面板底 + 浮起的活动块 */
+    .tabs{display:inline-flex;gap:2px;padding:3px;background:var(--panel);border-radius:9px}
+    .tab{
+      padding:4px 16px;border:none;cursor:pointer;font-size:13px;border-radius:7px;
+      text-decoration:none;color:var(--muted);background:transparent;transition:all .15s;
+    }
+    .tab:hover{color:var(--fg)}
+    .tab.active{background:var(--seg-active);color:var(--fg);font-weight:600;box-shadow:var(--shadow)}
+    .spacer{flex:1}
+    #status{font-size:12px;color:var(--muted)}
+
+    #toolbar{
+      display:flex;gap:8px;align-items:center;padding:10px 12px;
+      border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--bg);z-index:5;
+    }
+    #search{
+      flex:1;padding:6px 10px;border:1px solid var(--line);border-radius:8px;
+      font-size:12px;outline:none;background:var(--bg);color:var(--fg);transition:border-color .15s, box-shadow .15s;
+    }
+    #search:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-weak)}
+    select,button{
+      padding:6px 10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);
+      color:var(--fg);font-size:12px;cursor:pointer;transition:background .15s;
+    }
+    button:hover,select:hover{background:var(--hover)}
+    button:focus-visible,select:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+
+    #summary{
+      display:flex;flex-wrap:wrap;gap:6px;padding:8px 12px;border-bottom:1px solid var(--line);
+      align-items:center;
+    }
+    .sum-group{display:flex;flex-wrap:wrap;gap:6px;align-items:center;flex:1 1 auto;min-width:0}
+    .sum-sep{width:1px;align-self:stretch;background:var(--line);margin:0 4px}
+    .sum-tag{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;padding-right:2px}
+    .chip{
+      background:var(--chip);border-radius:999px;padding:3px 10px;font-size:11px;color:var(--muted);
+      cursor:pointer;user-select:none;border:1px solid transparent;transition:all .15s;
+    }
+    .chip:hover{background:var(--bg);border-color:var(--line);color:var(--fg)}
+    .chip.active{background:var(--accent);color:var(--accent-fg);border-color:var(--accent)}
+    .chip.active b{color:var(--accent-fg)}
+    .chip b{color:var(--fg);font-weight:600}
+    .sum-total{
+      margin-left:auto;padding:3px 12px;font-size:12px;color:var(--accent);
+      background:var(--accent-weak);border:1px solid transparent;border-radius:999px;flex:0 0 auto;
+    }
+    .sum-total b{font-size:13px}
+
+    main{display:flex;gap:0;align-items:flex-start}
+    .col{flex:1;padding:10px 12px;min-width:0}
+    .col:first-child{border-right:1px solid var(--line);max-width:320px}
+
+    .group{margin-bottom:16px}
+    .gtitle{
+      font-weight:600;font-size:13px;border-left:3px solid var(--accent);
+      padding-left:8px;display:flex;align-items:center;gap:6px;cursor:pointer;user-select:none;
+    }
+    .count{
+      background:var(--danger);color:#fff;border-radius:999px;padding:0 7px;
+      font-size:11px;font-weight:600;line-height:16px;
+    }
+    .count.zero{background:var(--chip);color:var(--muted)}
+    .gact{margin-left:auto;font-size:11px;color:var(--muted);cursor:pointer;padding:1px 6px;border-radius:4px}
+    .gact:hover{color:var(--accent);background:var(--accent-weak)}
+    .gbody{
+      margin:6px 0 0 11px;white-space:pre-wrap;word-break:break-all;
+      max-height:190px;overflow:auto;font-size:12px;font-family:var(--mono);color:var(--fg);
+    }
+    .gbody.collapsed{display:none}
+    .line{padding:2px 5px;border-radius:4px;cursor:pointer;transition:background .1s}
+    .line:hover{background:var(--hover)}
+    .empty{color:var(--muted);font-size:12px}
+    .m-badge{display:inline-block;margin-right:6px;padding:0 6px;border-radius:4px;font-size:10px;line-height:15px;font-weight:600;color:#fff;background:#6b7280;vertical-align:1px;font-family:var(--mono)}
+    .m-badge.m-get{background:#0e7490}
+    .m-badge.m-post{background:#16a34a}
+    .m-badge.m-put{background:#b45309}
+    .m-badge.m-delete{background:#dc2626}
+    .m-badge.m-patch{background:#7c3aed}
+    .m-tag{display:inline-block;margin-left:6px;padding:0 7px;border-radius:999px;font-size:10px;line-height:16px;background:var(--chip);color:var(--muted);vertical-align:1px}
+    .m-tag.conf-high{background:#fee2e2;color:#b91c1c}
+    .m-tag.conf-medium{background:#fef3c7;color:#92400e}
+    .m-tag.conf-low{background:var(--chip);color:var(--muted)}
+    .m-tag.jwt-tag{background:#e0e7ff;color:#4338ca;cursor:help}
+    .m-tag.jwt-warn{background:#fee2e2;color:#b91c1c;cursor:help}
+    .src{color:var(--muted);font-size:11px}
+    #framework{margin:0 12px 12px;padding:8px 12px;background:var(--accent-weak);border-radius:8px;font-size:12px;color:var(--accent)}
+    #framework.collapsed{display:none}
+    /* 运行时观测面：整行铺开，不挤进上面两列 */
+    .runtime{padding:0 12px 14px;display:flex;flex-wrap:wrap;gap:0 20px}
+    .runtime .group{flex:1 1 300px;min-width:0}
+    .runtime .gbody{max-height:150px}
+
+    /* 空状态：整页居中，说清楚「为什么是空的」 */
+    #empty{display:none;padding:56px 24px;text-align:center;color:var(--muted)}
+    #empty .big{font-size:30px;margin-bottom:10px}
+    #empty .why{font-size:15px;font-weight:700;color:var(--fg);margin-bottom:8px}
+    #empty .hint{font-size:12px;line-height:1.8;max-width:460px;margin:0 auto;word-break:break-all}
+    #empty .ebtn{
+      display:inline-block;margin:14px 4px 0;padding:6px 16px;border-radius:8px;cursor:pointer;
+      font-size:12px;border:1px solid var(--line);background:var(--chip);color:var(--fg);transition:background .15s;
+    }
+    #empty .ebtn:hover{background:var(--hover)}
+    body.no-data main, body.no-data #summary, body.no-data #framework,
+    body.no-data .runtime, body.no-data #toolbar{display:none}
+    @media (prefers-color-scheme:dark){
+      :root{
+        --bg:#0d1117; --panel:#161b22; --fg:#e6edf3; --muted:#8b949e; --line:#30363d;
+        --accent:#3b82f6; --accent-weak:#12233f; --accent-fg:#ffffff;
+        --danger:#f85149; --ok:#3fb950; --chip:#21262d; --hover:#21262d;
+        --seg-active:#2d333b; --flash:#12331f;
+      }
+      .gbody{color:#c9d1d9}
+      .m-badge{background:#39424e}
+      .m-tag{background:#21262d;color:#8b949e}
+      .m-tag.conf-high{background:#3d1d20;color:#ff8182}
+      .m-tag.conf-medium{background:#3b2b16;color:#e3b341}
+      .m-tag.conf-low{background:#21262d;color:#8b949e}
+      .m-tag.jwt-tag{background:#232441;color:#98a0f0}
+      .m-tag.jwt-warn{background:#3d1d20;color:#ff8182}
+      .count.zero{background:#21262d;color:#8b949e}
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <nav class="tabs">
+      <a class="tab active" href="popup.html">主页</a>
+      <a class="tab" href="settings.html">配置</a>
+    </nav>
+    <span class="spacer"></span>
+    <span id="status">等待数据…</span>
+  </header>
+
+  <div id="toolbar">
+    <input id="search" type="search" placeholder="过滤结果（支持关键词，实时）" autocomplete="off">
+    <select id="scope">
+      <option value="all">全部来源</option>
+      <option value="self">仅当前域名</option>
+      <option value="js">仅来自 JS</option>
+      <option value="route">仅路由</option>
+    </select>
+    <select id="export">
+      <option value="">导出…</option>
+      <option value="json">JSON</option>
+      <option value="csv">CSV</option>
+      <option value="urls">URL 列表（供 ffuf）</option>
+      <option value="paths">路径列表（供 Burp）</option>
+    </select>
+    <button id="btn-expand">折叠全部</button>
+  </div>
+
+  <div id="summary"></div>
+  <div id="framework" class="collapsed"></div>
+
+  <main>
+    <div class="col" id="col-primary"></div>
+    <div class="col" id="col-network"></div>
+  </main>
+
+  <div class="runtime" id="col-runtime"></div>
+
+  <div id="empty"></div>
+
+  <script src="src/utils/hostmatch.js"></script>
+  <script src="popup.js"></script>
+</body>
+</html>

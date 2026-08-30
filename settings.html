@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>InfoHunter 配置</title>
+  <style>
+    :root{
+      --bg:#fff; --panel:#f6f7f9; --fg:#1f2328; --muted:#6b7280; --line:#e5e7eb;
+      --accent:#2563eb; --accent-weak:#eff6ff; --accent-fg:#fff; --ok:#16a34a;
+      --chip:#f3f4f6; --hover:#f3f4f6; --seg-active:#ffffff;
+      --shadow:0 1px 3px rgba(0,0,0,.08);
+      --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;
+    }
+    *{box-sizing:border-box}
+    ::-webkit-scrollbar{width:9px;height:9px}
+    ::-webkit-scrollbar-thumb{background:var(--line);border-radius:5px;border:2px solid var(--bg)}
+    ::-webkit-scrollbar-track{background:transparent}
+    body{
+      /* 820px 是理想宽度；max-width:100% 是为了在 popup 里被压到 800px 上限时
+         不再横向溢出——从 popup 的「配置」tab 进来就是这个场景 */
+      width:820px;max-width:100%;margin:0;padding:0 14px 28px;overflow-x:hidden;
+      background:var(--bg);color:var(--fg);
+      font:13px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI","Microsoft YaHei",sans-serif;
+    }
+    header{display:flex;gap:8px;padding:10px 0 4px}
+    .tabs{display:inline-flex;gap:2px;padding:3px;background:var(--panel);border-radius:9px}
+    .tab{
+      padding:4px 16px;border:none;cursor:pointer;font-size:13px;border-radius:7px;
+      text-decoration:none;color:var(--muted);background:transparent;transition:all .15s;
+    }
+    .tab:hover{color:var(--fg)}
+    .tab.active{background:var(--seg-active);color:var(--fg);font-weight:600;box-shadow:var(--shadow)}
+    .row{
+      display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--line);
+    }
+    /* 提示文案很长时开关跟随顶部，避免飘在段落正中间 */
+    .row.align-top{align-items:flex-start}
+    .row.align-top .switch{margin-top:2px}
+    .row .label{flex:1;min-width:0;font-size:13px}
+    /* 长代码 token（XMLHttpRequest.prototype.open/send 这类）必须可断行，否则整行撑出视口 */
+    .row .hint{display:block;color:var(--muted);font-size:11px;margin-top:3px;line-height:1.7;overflow-wrap:anywhere;word-break:break-word}
+    .hint b{color:var(--fg);font-weight:600}
+    /* 现代 iOS 式开关：轨道 + 圆钮，aria 语义由 settings.js 维护 */
+    .switch{
+      position:relative;flex:0 0 40px;width:40px;height:22px;border-radius:11px;
+      background:#c7ccd4;cursor:pointer;transition:background .18s;
+    }
+    .switch .knob{
+      position:absolute;top:2px;left:2px;width:18px;height:18px;border-radius:50%;
+      background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.25);transition:left .18s;
+    }
+    .switch.on{background:var(--accent)}
+    .switch.on .knob{left:20px}
+    .switch:hover{filter:brightness(1.06)}
+    input[type=text],input[type=number],select,textarea{
+      border:1px solid var(--line);border-radius:8px;padding:6px 9px;font-size:12px;outline:none;
+      font-family:inherit;background:var(--bg);color:var(--fg);
+      transition:border-color .15s, box-shadow .15s;
+    }
+    input:focus,select:focus,textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-weak)}
+    textarea{width:100%;min-height:120px;resize:vertical;font-family:var(--mono);font-size:12px;line-height:1.6}
+    textarea.short{min-height:88px}
+    .sec{font-weight:700;font-size:14px;margin:22px 0 4px;border-left:3px solid var(--accent);padding-left:8px}
+    .sub{font-weight:600;font-size:13px;margin:18px 0 6px;color:var(--accent)}
+    .sub .subhint{font-weight:400;color:var(--muted);font-size:12px;margin-left:4px}
+    /* 纯说明块：不进 .row 的分隔线体系，也就不必被 flex 拉伸 */
+    .note{margin:0 0 8px;color:var(--muted);font-size:11px;line-height:1.7;overflow-wrap:anywhere;word-break:break-word}
+    code{
+      font-family:var(--mono);
+      font-size:11px;color:var(--fg);background:var(--chip);
+      border:1px solid var(--line);border-radius:4px;padding:0 4px;
+      overflow-wrap:anywhere;word-break:break-word;
+    }
+    .btn{
+      padding:6px 16px;border:1px solid var(--accent);border-radius:8px;cursor:pointer;
+      background:var(--accent);color:var(--accent-fg);font-size:12px;transition:opacity .15s;
+    }
+    .btn.sec2{background:var(--bg);color:var(--accent);border-color:var(--line)}
+    .btn:hover{opacity:.85}
+    .actions{margin-top:10px;display:flex;gap:8px;align-items:center}
+    .grid{display:flex;gap:10px;align-items:center;margin:6px 0}
+    /* 90px 装不下「自定义 headers」，会被挤成两行 */
+    .grid .k{width:112px;flex:0 0 112px;color:var(--muted);font-size:12px}
+    .msg{color:var(--ok);font-size:12px;margin-left:8px;opacity:0;transition:opacity .2s}
+    .msg.show{opacity:1}
+    .risk{
+      display:inline-block;margin-left:6px;padding:0 8px;border-radius:999px;
+      font-size:11px;line-height:16px;font-weight:500;
+    }
+    .risk.low{background:#e7f5e0;color:#3b6d11}
+    .risk.mid{background:#fef3c7;color:#92400e}
+    /* 危险操作（清理本地缓存） */
+    .abtn{
+      padding:5px 14px;border:1px solid #fca5a5;border-radius:8px;cursor:pointer;
+      font-size:12px;color:#b91c1c;background:transparent;transition:all .15s;
+    }
+    .abtn:hover{background:#fee2e2;border-color:#ef4444}
+    /* 暗色覆盖置于末尾，保证与上方同名规则同特异性时能胜出 */
+    @media (prefers-color-scheme:dark){
+      :root{
+        --bg:#0d1117; --panel:#161b22; --fg:#e6edf3; --muted:#8b949e; --line:#30363d;
+        --accent:#3b82f6; --accent-weak:#12233f; --accent-fg:#fff;
+        --chip:#21262d; --hover:#21262d; --seg-active:#2d333b; --ok:#3fb950;
+      }
+      .switch{background:#4a515c}
+      .risk.low{background:#20301a;color:#7ee08a}
+      .risk.mid{background:#3b2b16;color:#e3b341}
+      .abtn:hover{background:#3d1d20;border-color:#7f2b2b}
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <nav class="tabs">
+      <a class="tab" href="popup.html">主页</a>
+      <a class="tab active" href="settings.html">配置</a>
+    </nav>
+  </header>
+
+  <div class="sec">抓取行为</div>
+
+  <div class="row">
+    <div class="label">
+      安全模式
+      <span class="hint">开启时只抓取 JS 资源；关闭后会抓取 src/href 里的全部地址（含 css、图片），可能产生预期外请求</span>
+    </div>
+    <div class="switch" id="settingSafeMode" role="switch" aria-checked="false"><span class="knob"></span></div>
+  </div>
+
+  <div class="row">
+    <div class="label">
+      自动超时
+      <span class="hint">开启后单个请求超时 2 秒，关闭则 8 秒</span>
+    </div>
+    <div class="switch" id="fetch_timeout" role="switch" aria-checked="false"><span class="knob"></span></div>
+  </div>
+
+  <div class="row">
+    <div class="label">
+      Sourcemap 抓取<span class="risk low">低风险</span>
+      <span class="hint">发现 .js.map 后拉取并还原原始源码路径与源码内容，二次提取。对 Webpack / Vite 站点价值极高。
+        地图地址是站点自己在注释里声明的，单个 GET、并发 3、最多 20 个</span>
+    </div>
+    <div class="switch" id="enable_sourcemap" role="switch" aria-checked="false"><span class="knob"></span></div>
+  </div>
+
+  <div class="row">
+    <div class="label">
+      JS 递归抓取（depth 2）<span class="risk mid">中风险</span>
+      <span class="hint">从已抓到的 JS 里再抽动态 import 与 chunk 引用并抓取。只取同源、只抓代码里真实引用的地址，
+        不做 URL 猜测。会提前拉取懒加载资源形成请求突发，最多 30 个、并发 2</span>
+    </div>
+    <div class="switch" id="enable_js_recursive" role="switch" aria-checked="false"><span class="knob"></span></div>
+  </div>
+
+  <div class="row">
+    <div class="label">
+      框架运行时分析
+      <span class="hint">读取 Vue / Next.js / Nuxt / React Router 的路由表与全局配置（在主世界执行）</span>
+    </div>
+    <div class="switch" id="enable_framework" role="switch" aria-checked="false"><span class="knob"></span></div>
+  </div>
+
+  <div class="sec">运行时观测<span class="risk low">零请求</span></div>
+  <div class="note">
+    下面三项都是<strong>被动记录</strong>——只把页面本来就会做的事记下来，不发起任何请求，
+    因此不占用请求边界里的风险额度。收的是「浏览器实际做了什么」，与静态扫描看到的
+    「HTML 里写了什么」互补。
+  </div>
+
+  <div class="row align-top">
+    <div class="label">
+      网络请求记录
+      <span class="hint">记录页面实际发出的 XHR / fetch 地址、请求方法与查询参数名。
+        已按白名单过滤，白名单站点一个请求都不记；4xx/5xx 不记（噪声太大）。</span>
+    </div>
+    <div class="switch" id="enable_request_log" role="switch" aria-checked="false"><span class="knob"></span></div>
+  </div>
+
+  <div class="row align-top">
+    <div class="label">
+      运行时钩子
+      <span class="hint">在主世界包装 <code>fetch</code>、<code>XMLHttpRequest</code>，记录
+        WebSocket / SSE / Worker 端点与本地存储（Web Storage、cookie）的键名与值，
+        并在页面<b>读取响应体</b>的那一刻旁观数据 —— 接口 JSON 里的手机号 / 邮箱 / 凭据由此入库，
+        标注来源 <code>[response-body]</code>；存储值命中的凭据标注 <code>[storage-value]</code>。
+        <b>钩子只做记录，不改变原调用行为、不发起任何请求</b>；装上之前会探测宿主环境，装不上就跳过。</span>
+    </div>
+    <div class="switch" id="enable_runtime" role="switch" aria-checked="false"><span class="knob"></span></div>
+  </div>
+
+  <div class="row align-top">
+    <div class="label">
+      SPA 增量补扫
+      <span class="hint">单页应用路由切换后懒加载进来的 script，首屏扫描抓不到。开启后监听 DOM 插入，
+        新出现的脚本地址会补抓（每批 20 个、3 分钟后停止）。</span>
+    </div>
+    <div class="switch" id="enable_spa_rescan" role="switch" aria-checked="false"><span class="knob"></span></div>
+  </div>
+
+  <div class="row">
+    <div class="label">
+      并发数
+      <span class="hint">同时抓取的 JS 数量。目标站点较慢时调低</span>
+    </div>
+    <input type="number" id="concurrency" min="1" max="16" step="1" style="width:80px">
+  </div>
+
+  <div class="row">
+    <div class="label">
+      全局悬浮窗
+      <span class="hint">在每个页面上显示结果面板</span>
+    </div>
+    <div class="switch" id="global_float" role="switch" aria-checked="false"><span class="knob"></span></div>
+  </div>
+
+  <div class="sec">域名白名单</div>
+
+  <div class="row align-top">
+    <div class="label">
+      使用内置默认名单
+      <span class="hint">内置名单分两层：<b>站点级</b>（搜索引擎、社交、电商、代码托管、邮箱、大厂官网、安全社区等，
+        命中的页面完全不扫描）与<b>资源级</b>（统计、广告、风控、客服、地图、错误监控、公共 CDN 等第三方 SDK，
+        页面照扫但这些脚本跳过不抓）。下面填的条目是<b>叠加</b>在内置名单之上的，关掉这里才只认你自己填的。</span>
+    </div>
+    <div class="switch" id="use_default_allowlist" role="switch" aria-checked="false"><span class="knob"></span></div>
+  </div>
+
+  <div class="sub">站点级白名单<span class="subhint">命中的页面完全不扫描</span></div>
+  <div class="note">
+    每行一条。<code>example.com</code>、<code>.example.com</code>、<code>*.example.com</code> 三种写法等价，
+    都表示域名自身加所有子域；也可以直接粘贴完整网址（<code>https://www.example.com/a/b?x=1</code>），会自动取主机部分。
+    限定端口写成 <code>example.com:8080</code>。大小写不敏感，保存时归一化回写。
+  </div>
+  <textarea id="allowlist" placeholder="example.com&#10;.internal.corp.com&#10;localhost:3000"></textarea>
+  <div class="actions">
+    <div class="btn" id="save_allowlist">保存</div>
+    <div class="btn sec2" id="reset_allowlist">清空</div>
+    <span class="msg" id="allowlist_msg">已保存</span>
+  </div>
+
+  <div class="sub">资源级黑名单<span class="subhint">页面照扫，但这些域名的脚本不抓</span></div>
+  <div class="note">
+    用于过滤统计、广告、风控、客服、地图、错误监控这类第三方 SDK —— 动辄几百 KB 压缩代码，除了噪声什么也产不出。
+    <b>目标自有的 cdn.xxx.com 不要加进来</b>，当前页面所在的域名永远不会被这条名单拦下。
+  </div>
+  <textarea id="resource_blocklist" class="short" placeholder="googletagmanager.com&#10;skynet.vendor.com"></textarea>
+  <div class="actions">
+    <div class="btn" id="save_blocklist">保存</div>
+    <div class="btn sec2" id="reset_blocklist">清空</div>
+    <span class="msg" id="blocklist_msg">已保存</span>
+  </div>
+
+  <div class="sec">Webhook</div>
+  <div class="grid"><span class="k">回调地址</span><input type="text" id="url" style="flex:1"></div>
+  <div class="grid">
+    <span class="k">请求方法</span>
+    <select id="method"><option value="GET">GET</option><option value="POST">POST</option></select>
+  </div>
+  <div class="grid"><span class="k">参数名</span><input type="text" id="arg" style="flex:1"></div>
+  <div class="grid"><span class="k">自定义 headers</span><textarea id="headers" placeholder='{"auth":"auth_key"}' style="min-height:80px"></textarea></div>
+  <div class="actions">
+    <div class="btn" id="save">保存</div>
+    <div class="btn sec2" id="reset">置空并保存</div>
+    <span class="msg" id="webhook_msg">已保存</span>
+  </div>
+
+  <div class="sec">数据</div>
+  <div class="row">
+    <div class="label">
+      清理本地缓存
+      <span class="hint">清空全部已保存的扫描结果（历史结果默认保留 3 天）</span>
+    </div>
+    <div class="abtn" id="settingClearLocalStorage">清理数据…</div>
+  </div>
+
+  <script src="settings.js"></script>
+</body>
+</html>
